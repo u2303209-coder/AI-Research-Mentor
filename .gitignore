@@ -1,0 +1,28 @@
+# Python
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# Environment Variables
+backend/.env
+
+# Node Modules
+frontend/node_modules/
+
+# Build Files
+frontend/dist/
+
+# Chroma Database
+chroma_db/
+backend/chroma_db/
+
+# Uploads
+uploads/
+backend/uploads/
+
+# VSCode
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
