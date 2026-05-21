@@ -105,7 +105,7 @@ function ProjectGenerator() {
             sx={{ mt: 2 }}
           >
 
-            Generate innovative AI/ML
+            Generate innovative
             project ideas using
             Large Language Models.
 
@@ -115,7 +115,7 @@ function ProjectGenerator() {
 
         <TextField
           fullWidth
-          label="Enter AI Domain"
+          label="Enter Domain"
           value={domain}
           onChange={(e) =>
             setDomain(e.target.value)
