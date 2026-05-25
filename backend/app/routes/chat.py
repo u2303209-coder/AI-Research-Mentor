@@ -5,39 +5,68 @@ from app.services.llm_service import ask_llm
 
 router = APIRouter()
 
+
+# ---------------- REQUEST MODEL ---------------- #
+
 class ChatRequest(BaseModel):
-    message: str
+    messages: list
+
+
+# ---------------- CHAT ROUTE ---------------- #
 
 @router.post("/chat")
 def chat(data: ChatRequest):
 
+    # BUILD CONVERSATION HISTORY
+
+    conversation = ""
+
+    for msg in data.messages:
+
+        role = msg["role"]
+
+        content = msg["content"]
+
+        if role == "user":
+
+            conversation += f"User: {content}\n"
+
+        else:
+
+            conversation += f"Assistant: {content}\n"
+
+
+    # PROMPT
+
     prompt = f"""
-You are answering questions related to:
+You are a smart AI assistant specialized in:
+
 - Artificial Intelligence
 - Machine Learning
 - Deep Learning
-- Generative AI
 - NLP
 - Data Science
+- Generative AI
 
-Answer the following question accurately.
+Guidelines:
+- Answer naturally like ChatGPT
+- Maintain conversation continuity
+- Be conversational and professional
+- Beginner-friendly explanations
+- Keep responses concise but meaningful
+- Use bullet points whenever suitable
+- Strictly Avoid markdown symbols like ** or ##
+- Avoid huge paragraphs
+- Explain technical topics in simple terms
+- Respond intelligently according to context
 
-Rules:
-- Use markdown bullet points
-- Keep answers concise
-- Use standard AI/ML terminology
-- Beginner-friendly explanation
-- Avoid hallucinations
+Conversation:
+{conversation}
 
-Question:
-{data.message}
-
-Example Format:
-
-- Point 1
-- Point 2
-- Point 3
+Assistant:
 """
+
+    # GENERATE RESPONSE
 
     response = ask_llm(prompt)
 

@@ -1,197 +1,136 @@
 import {
-
-  Container,
-  Typography,
-  Paper,
   Box,
-  Button
-
+  Button,
+  Container,
+  Paper,
+  Typography,
 } from "@mui/material";
 
-import PsychologyAltIcon
-from "@mui/icons-material/PsychologyAlt";
+import PsychologyIcon from "@mui/icons-material/Psychology";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 
-import PictureAsPdfIcon
-from "@mui/icons-material/PictureAsPdf";
+import { useNavigate } from "react-router-dom";
 
-import SmartToyIcon
-from "@mui/icons-material/SmartToy";
+export default function Home() {
 
-function Home() {
+  const navigate = useNavigate();
+
+  // ---------------- SCROLL TO FEATURES ---------------- //
 
   const scrollToFeatures = () => {
 
-    const section =
-      document.getElementById(
-        "features-section"
-      );
+    const section = document.getElementById(
+      "features-section"
+    );
 
-    section.scrollIntoView({
-
-      behavior: "smooth"
-
+    section?.scrollIntoView({
+      behavior: "smooth",
     });
 
   };
-
-  const features = [
-
-    {
-
-      title:
-        "AI Project Generator",
-
-      description:
-        "Generate innovative AI/ML project ideas instantly using Large Language Models.",
-
-      icon:
-        <PsychologyAltIcon
-          sx={{
-            fontSize: 70,
-            color: "#8b5cf6"
-          }}
-        />
-
-    },
-
-    {
-
-      title:
-        "PDF Question Answering",
-
-      description:
-        "Upload research papers and ask intelligent context-aware questions using RAG architecture.",
-
-      icon:
-        <PictureAsPdfIcon
-          sx={{
-            fontSize: 70,
-            color: "#ef4444"
-          }}
-        />
-
-    },
-
-    {
-
-      title:
-        "AI Chatbot",
-
-      description:
-        "Interact with an AI assistant for technical explanations, AI concepts, and research guidance.",
-
-      icon:
-        <SmartToyIcon
-          sx={{
-            fontSize: 70,
-            color: "#10b981"
-          }}
-        />
-
-    }
-
-  ];
 
   return (
 
     <Container
       maxWidth="xl"
+      sx={{
+        py: 0,
+      }}
     >
 
       {/* HERO SECTION */}
 
       <Box
         sx={{
+          textAlign: "center",
 
           minHeight: "100vh",
 
           display: "flex",
-
           flexDirection: "column",
 
           justifyContent: "center",
-
           alignItems: "center",
 
-          textAlign: "center"
-
+          pb: 8,
         }}
       >
 
         <Typography
           variant="h1"
-          fontWeight="bold"
           sx={{
+            fontWeight: 900,
+            color: "#0f172a",
 
             fontSize: {
+              xs: "3rem",
+              md: "5rem",
+            },
 
-              xs: "55px",
+            letterSpacing: "-2px",
+            lineHeight: 1.05,
 
-              md: "90px"
-
-            }
-
+            mb: 4,
           }}
         >
-
           AI-Powered
           <br />
           Research Mentor
-
         </Typography>
 
         <Typography
           variant="h6"
-          color="text.secondary"
           sx={{
-
-            mt: 4,
+            color: "#475569",
 
             maxWidth: "900px",
 
-            lineHeight: 1.8
+            mx: "auto",
 
+            lineHeight: 1.9,
+
+            fontWeight: 400,
+
+            fontSize: {
+              xs: "1rem",
+              md: "1.3rem",
+            },
           }}
         >
-
-          An AI-driven platform for generating
-          innovative project ideas,
-          interacting with intelligent chatbots,
-          and performing PDF Question Answering
-          using Retrieval-Augmented Generation.
-
+          An AI-driven platform for generating innovative project ideas,
+          interacting with intelligent chatbots, and performing PDF
+          Question Answering using Retrieval-Augmented Generation.
         </Typography>
 
         <Button
           variant="contained"
-          size="large"
           onClick={scrollToFeatures}
           sx={{
-
-            mt: 5,
+            mt: 6,
 
             px: 5,
+            py: 1.8,
 
-            py: 1.5,
+            borderRadius: "18px",
 
-            borderRadius: 3,
+            fontWeight: 700,
 
-            fontSize: "18px",
+            fontSize: "1rem",
 
-            transition: "0.3s",
+            textTransform: "none",
+
+            background: "#2563eb",
+
+            boxShadow:
+              "0 6px 18px rgba(37,99,235,0.3)",
 
             "&:hover": {
-
-              transform:
-                "translateY(-3px)"
-
-            }
-
+              background: "#1d4ed8",
+            },
           }}
         >
-
           Explore Features
-
         </Button>
 
       </Box>
@@ -202,99 +141,235 @@ function Home() {
         id="features-section"
         sx={{
 
-          pb: 10,
+          pt: 10,
 
-          display: "flex",
+          display: "grid",
 
-          justifyContent: "center",
-
-          alignItems: "stretch",
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "1fr 1fr 1fr",
+          },
 
           gap: 4,
 
-          flexWrap: "wrap"
+          alignItems: "stretch",
 
+          pb: 10,
         }}
       >
 
-        {features.map((feature, index) => (
+        {/* PROJECT GENERATOR */}
 
-          <Paper
-            key={index}
+        <Paper
+          elevation={0}
+          onClick={() =>
+            navigate("/projects")
+          }
+          sx={{
+            p: 5,
 
-            elevation={4}
+            borderRadius: "28px",
 
+            background: "#ffffff",
+
+            textAlign: "center",
+
+            cursor: "pointer",
+
+            transition: "0.3s",
+
+            boxShadow:
+              "0 6px 24px rgba(0,0,0,0.08)",
+
+            "&:hover": {
+              transform:
+                "translateY(-8px)",
+            },
+          }}
+        >
+
+          <PsychologyIcon
             sx={{
+              fontSize: 70,
+              color: "#7c3aed",
+              mb: 3,
+            }}
+          />
 
-              width: "350px",
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
 
-              minHeight: "320px",
+              color: "#0f172a",
 
-              p: 4,
+              mb: 2,
 
-              borderRadius: 5,
-
-              textAlign: "center",
-
-              display: "flex",
-
-              flexDirection: "column",
-
-              justifyContent: "center",
-
-              transition:
-                "all 0.3s ease",
-
-              "&:hover": {
-
-                transform:
-                  "translateY(-10px) scale(1.03)",
-
-                boxShadow: 10
-
-              }
-
+              fontSize: "2.3rem",
             }}
           >
+            AI Project
+            <br />
+            Generator
+          </Typography>
 
-            <Box sx={{ mb: 3 }}>
-              {feature.icon}
-            </Box>
+          <Typography
+            sx={{
+              color: "#475569",
 
-            <Typography
-              variant="h4"
-              fontWeight="bold"
-              gutterBottom
-            >
+              lineHeight: 1.9,
 
-              {feature.title}
+              fontSize: "1rem",
+            }}
+          >
+            Generate innovative AI/ML project ideas instantly using
+            Large Language Models.
+          </Typography>
 
-            </Typography>
+        </Paper>
 
-            <Typography
-              color="text.secondary"
-              sx={{
+        {/* PDF QA */}
 
-                lineHeight: 1.8,
+        <Paper
+          elevation={0}
+          onClick={() =>
+            navigate("/pdfqa")
+          }
+          sx={{
+            p: 5,
 
-                fontSize: "17px"
+            borderRadius: "28px",
 
-              }}
-            >
+            background: "#ffffff",
 
-              {feature.description}
+            textAlign: "center",
 
-            </Typography>
+            cursor: "pointer",
 
-          </Paper>
+            transition: "0.3s",
 
-        ))}
+            boxShadow:
+              "0 6px 24px rgba(0,0,0,0.08)",
+
+            "&:hover": {
+              transform:
+                "translateY(-8px)",
+            },
+          }}
+        >
+
+          <PictureAsPdfIcon
+            sx={{
+              fontSize: 70,
+              color: "#ef4444",
+              mb: 3,
+            }}
+          />
+
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+
+              color: "#0f172a",
+
+              mb: 2,
+
+              fontSize: "2.3rem",
+            }}
+          >
+            PDF Question
+            <br />
+            Answering
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "#475569",
+
+              lineHeight: 1.9,
+
+              fontSize: "1rem",
+            }}
+          >
+            Upload research papers and ask intelligent context-aware
+            questions using RAG architecture.
+          </Typography>
+
+        </Paper>
+
+        {/* CHATBOT */}
+
+        <Paper
+          elevation={0}
+          onClick={() =>
+            navigate("/chatbot")
+          }
+          sx={{
+            p: 5,
+
+            borderRadius: "28px",
+
+            background: "#ffffff",
+
+            textAlign: "center",
+
+            cursor: "pointer",
+
+            transition: "0.3s",
+
+            boxShadow:
+              "0 6px 24px rgba(0,0,0,0.08)",
+
+            "&:hover": {
+              transform:
+                "translateY(-8px)",
+            },
+          }}
+        >
+
+          <SmartToyIcon
+            sx={{
+              fontSize: 70,
+              color: "#10b981",
+              mb: 3,
+            }}
+          />
+
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+
+              color: "#0f172a",
+
+              mb: 2,
+
+              fontSize: "2.3rem",
+            }}
+          >
+            AI Chatbot
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "#475569",
+
+              lineHeight: 1.9,
+
+              fontSize: "1rem",
+            }}
+          >
+            Interact with an AI assistant for technical explanations,
+            AI concepts, and research guidance.
+          </Typography>
+
+        </Paper>
 
       </Box>
 
     </Container>
 
   );
-}
 
-export default Home;
+}

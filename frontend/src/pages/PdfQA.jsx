@@ -1,91 +1,108 @@
-import { useState } from "react";
-
-import API from "../api/api";
-
-import ReactMarkdown from "react-markdown";
-
 import {
-
-  Container,
-  Typography,
-  Button,
   Box,
+  Button,
+  Container,
+  Paper,
   TextField,
-  CircularProgress,
-  Paper
-
+  Typography,
 } from "@mui/material";
 
-import PictureAsPdfIcon
-from "@mui/icons-material/PictureAsPdf";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
-function PdfQA() {
+import { useState } from "react";
 
-  const [file, setFile] =
-    useState(null);
+import axios from "axios";
 
-  const [question, setQuestion] =
-    useState("");
+export default function PdfQA() {
 
-  const [answer, setAnswer] =
-    useState("");
+  const [file, setFile] = useState(null);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [question, setQuestion] = useState("");
 
-  const uploadPDF = async () => {
+  const [answer, setAnswer] = useState("");
 
-    if (!file) return;
+  const [loading, setLoading] = useState(false);
 
-    const formData =
-      new FormData();
+  // ---------------- UPLOAD PDF ---------------- //
+
+  const handleFileChange = async (e) => {
+
+    const selectedFile = e.target.files[0];
+
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+
+    const formData = new FormData();
 
     formData.append(
       "file",
-      file
+      selectedFile
     );
 
-    await API.post(
-      "/upload-pdf",
-      formData
-    );
+    try {
+
+      await axios.post(
+
+        "http://127.0.0.1:8000/upload-pdf",
+
+        formData
+
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
   };
 
-  const askQuestion =
-    async () => {
+  // ---------------- ASK QUESTION ---------------- //
 
-      setLoading(true);
+  const askQuestion = async () => {
 
-      try {
+    if (!question) return;
 
-        await uploadPDF();
+    setLoading(true);
 
-        const res =
-          await API.post(
-            "/ask-pdf",
-            { question }
-          );
+    setAnswer("");
 
-        setAnswer(
-          res.data.response
-        );
+    try {
 
-      } catch (error) {
+      const res = await axios.post(
 
-        console.log(error);
+        "http://127.0.0.1:8000/ask-pdf",
 
-      }
+        {
+          question,
+        }
 
-      setLoading(false);
-    };
+      );
+
+      setAnswer(
+        res.data.response
+      );
+
+    } catch (error) {
+
+      setAnswer(
+        "Error generating response."
+      );
+
+    }
+
+    setLoading(false);
+
+  };
 
   return (
 
     <Container
       maxWidth="lg"
       sx={{
-        mt: 6,
-        mb: 8
+        py: 6,
       }}
     >
 
@@ -93,31 +110,49 @@ function PdfQA() {
 
       <Box
         sx={{
-          mb: 5
+          textAlign: "center",
+          mb: 6,
         }}
       >
 
+        <PictureAsPdfIcon
+          sx={{
+            fontSize: 65,
+            color: "#ef4444",
+            mb: 2,
+          }}
+        />
+
         <Typography
-          variant="h3"
-          fontWeight="bold"
+          variant="h1"
+          sx={{
+            fontWeight: 850,
+            color: "#0f172a",
+            mb: 2,
+            fontSize: {
+              xs: "2.8rem",
+              md: "4.5rem",
+            },
+            letterSpacing: "-2px",
+            lineHeight: 1.1,
+          }}
         >
-
-          PDF Question Answering
-
+          PDF Question
+          <br />
+          Answering
         </Typography>
 
         <Typography
-          color="text.secondary"
+          variant="h6"
           sx={{
-            mt: 1,
-            fontSize: "17px"
+            color: "#475569",
+            fontWeight: 400,
+            maxWidth: "800px",
+            mx: "auto",
+            lineHeight: 1.8,
           }}
         >
-
-          Upload research papers and ask
-          intelligent context-aware questions
-          using Retrieval-Augmented Generation.
-
+          Upload PDFs and ask intelligent context-aware questions using RAG.
         </Typography>
 
       </Box>
@@ -125,260 +160,239 @@ function PdfQA() {
       {/* UPLOAD SECTION */}
 
       <Paper
-        elevation={1}
-
+        elevation={0}
         sx={{
-
-          border:
-            "1px solid #dbe2ea",
-
-          borderRadius: 4,
-
-          p: 4,
-
-          backgroundColor:
-            "#ffffff"
-
+          p: 5,
+          borderRadius: "28px",
+          background: "#ffffff",
+          border: "2px dashed #cbd5e1",
+          boxShadow:
+            "0 4px 20px rgba(0,0,0,0.05)",
+          textAlign: "center",
+          mb: 4,
         }}
       >
 
         <input
+          type="file"
           hidden
           id="pdf-upload"
-          type="file"
-
-          onChange={(e) =>
-            setFile(
-              e.target.files[0]
-            )
-          }
+          accept=".pdf"
+          onChange={handleFileChange}
         />
 
         <label htmlFor="pdf-upload">
 
           <Box
             sx={{
-
-              border:
-                "2px dashed #cbd5e1",
-
-              borderRadius: 3,
-
-              p: 5,
-
-              textAlign: "center",
-
               cursor: "pointer",
-
-              transition: "0.3s",
-
-              backgroundColor:
-                "#f8fafc",
-
-              "&:hover": {
-
-                borderColor:
-                  "#2563eb",
-
-                backgroundColor:
-                  "#eff6ff"
-
-              }
-
             }}
           >
 
             <PictureAsPdfIcon
               sx={{
-                fontSize: 55,
-                color: "#ef4444"
+                fontSize: 60,
+                color: "#ef4444",
+                mb: 2,
               }}
             />
 
             <Typography
-              variant="h6"
-              fontWeight="bold"
+              variant="h5"
               sx={{
-                mt: 2
+                fontWeight: 700,
+                mb: 1,
+                color: "#0f172a",
               }}
             >
-
               Upload PDF Document
-
             </Typography>
 
             <Typography
-              color="text.secondary"
               sx={{
-                mt: 1
+                color: "#64748b",
+                fontSize: "1rem",
               }}
             >
-
-              Drag & drop your PDF here
-              or click to browse
-
+              Drag & drop your PDF here or click to browse
             </Typography>
 
           </Box>
 
         </label>
 
-        {/* FILE PREVIEW */}
+      </Paper>
 
-        {file && (
+      {/* FILE DISPLAY */}
 
-          <Box
+      {file && (
+
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 4,
+            borderRadius: "20px",
+            background: "#f8fafc",
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            boxShadow:
+              "0 2px 10px rgba(0,0,0,0.04)",
+          }}
+        >
+
+          <PictureAsPdfIcon
             sx={{
-
-              mt: 3,
-
-              display: "flex",
-
-              alignItems: "center",
-
-              gap: 2,
-
-              p: 2,
-
-              borderRadius: 3,
-
-              backgroundColor:
-                "#f1f5f9"
-
+              color: "#ef4444",
+              fontSize: 40,
             }}
-          >
+          />
 
-            <PictureAsPdfIcon
+          <Box>
+
+            <Typography
               sx={{
-                color: "#ef4444"
+                fontWeight: 700,
+                color: "#111827",
               }}
-            />
+            >
+              {file.name}
+            </Typography>
 
-            <Box>
-
-              <Typography
-                fontWeight="bold"
-              >
-
-                {file.name}
-
-              </Typography>
-
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
-
-                Ready for analysis
-
-              </Typography>
-
-            </Box>
+            <Typography
+              sx={{
+                color: "#64748b",
+                fontSize: "0.9rem",
+              }}
+            >
+              Ready for analysis
+            </Typography>
 
           </Box>
 
-        )}
-
-      </Paper>
-
-      {/* QUESTION SECTION */}
-
-      <Box sx={{ mt: 5 }}>
-
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-
-          label="Ask question from PDF"
-
-          value={question}
-
-          onChange={(e) =>
-            setQuestion(
-              e.target.value
-            )
-          }
-        />
-
-        <Button
-          fullWidth
-          variant="contained"
-
-          size="large"
-
-          sx={{
-
-            mt: 3,
-
-            py: 1.5,
-
-            borderRadius: 3,
-
-            fontSize: "16px"
-
-          }}
-
-          onClick={askQuestion}
-
-          disabled={loading}
-        >
-
-          {loading
-            ? "Analyzing..."
-            : "Ask Question"}
-
-        </Button>
-
-      </Box>
-
-      {/* LOADING */}
-
-      {loading && (
-
-        <Box
-          sx={{
-
-            display: "flex",
-
-            justifyContent:
-              "center",
-
-            mt: 4
-
-          }}
-        >
-
-          <CircularProgress />
-
-        </Box>
+        </Paper>
 
       )}
 
-      {/* ANSWER */}
+      {/* QUESTION INPUT */}
+
+      <TextField
+        fullWidth
+        multiline
+        rows={5}
+        label="Ask question from PDF"
+        value={question}
+        onChange={(e) =>
+          setQuestion(e.target.value)
+        }
+        sx={{
+          mb: 4,
+        }}
+      />
+
+      {/* BUTTON */}
+
+      <Button
+        fullWidth
+        variant="contained"
+        size="large"
+        disabled={loading || !question}
+        onClick={askQuestion}
+        sx={{
+          py: 2,
+          borderRadius: "18px",
+          fontSize: "1rem",
+          fontWeight: 700,
+          textTransform: "none",
+          background: "#2563eb",
+
+          "&:hover": {
+            background: "#1d4ed8",
+          },
+        }}
+      >
+
+        {loading
+          ? "Analyzing..."
+          : "Ask Question"}
+
+      </Button>
+
+      {/* RESPONSE */}
 
       {answer && (
 
         <Paper
-          elevation={2}
-
+          elevation={0}
           sx={{
-
             mt: 5,
-
             p: 4,
-
-            borderRadius: 4,
-
-            backgroundColor:
-              "#ffffff"
-
+            borderRadius: "24px",
+            background: "#ffffff",
+            boxShadow:
+              "0 4px 20px rgba(0,0,0,0.08)",
           }}
         >
 
-          <ReactMarkdown>
-            {answer}
-          </ReactMarkdown>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              mb: 3,
+            }}
+          >
+
+            <AutoAwesomeIcon
+              sx={{
+                color: "#2563eb",
+              }}
+            />
+
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+              }}
+            >
+              AI Response
+            </Typography>
+
+          </Box>
+
+          <Box
+            component="ul"
+            sx={{
+              pl: 3,
+              m: 0,
+            }}
+          >
+
+            {answer
+              ?.split("•")
+              .filter(
+                (item) =>
+                  item.trim() !== ""
+              )
+              .map((item, index) => (
+
+                <Typography
+                  component="li"
+                  key={index}
+                  sx={{
+                    mb: 2,
+                    lineHeight: 1.9,
+                    color: "#374151",
+                    fontSize: "1rem",
+                  }}
+                >
+                  {item.trim()}
+                </Typography>
+
+              ))}
+
+          </Box>
 
         </Paper>
 
@@ -387,6 +401,5 @@ function PdfQA() {
     </Container>
 
   );
-}
 
-export default PdfQA;
+}

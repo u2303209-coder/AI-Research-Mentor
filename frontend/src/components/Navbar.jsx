@@ -1,72 +1,81 @@
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box
-} from "@mui/material";
-
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Navbar() {
 
+  const location = useLocation();
+
+  const isHomePage =
+    location.pathname === "/";
+
   return (
 
-    <AppBar position="static">
+    <nav
+      style={{
+        background: "#2f63e0",
 
-      <Toolbar>
+        padding: "20px 30px",
 
-        <Typography
-          variant="h6"
-          sx={{ flexGrow: 1 }}
+        display: "flex",
+
+        justifyContent: "space-between",
+
+        alignItems: "center",
+
+        boxShadow:
+          "0 2px 10px rgba(0,0,0,0.15)",
+      }}
+    >
+
+      {/* LOGO */}
+
+      <Link
+        to="/"
+
+        style={{
+          color: "white",
+
+          textDecoration: "none",
+
+          fontSize: "2rem",
+
+          fontWeight: "700",
+        }}
+      >
+        Research Mentor AI
+      </Link>
+
+      {/* SHOW HOME ONLY ON FEATURE PAGES */}
+
+      {!isHomePage && (
+
+        <Link
+          to="/"
+
+          style={{
+            color: "white",
+
+            textDecoration: "none",
+
+            fontSize: "1.1rem",
+
+            fontWeight: "600",
+
+            padding: "10px 18px",
+
+            borderRadius: "10px",
+
+            transition: "0.3s",
+          }}
         >
-          Research Mentor AI
-        </Typography>
+          Home
+        </Link>
 
-        <Box sx={{ display: "flex", gap: 2 }}>
+      )}
 
-          <Button
-            color="inherit"
-            component={Link}
-            to="/"
-          >
-            Home
-          </Button>
-
-          <Button
-            color="inherit"
-            component={Link}
-            to="/project"
-          >
-            Projects
-          </Button>
-
-            
-          
-
-          <Button
-            color="inherit"
-            component={Link}
-            to="/pdfqa"
-          >
-            PDF QA
-          </Button>
-
-          <Button
-            color="inherit"
-            component={Link}
-            to="/chat"
-          >
-            Chatbot
-          </Button>
-
-        </Box>
-
-      </Toolbar>
-
-    </AppBar>
+    </nav>
 
   );
+
 }
 
 export default Navbar;

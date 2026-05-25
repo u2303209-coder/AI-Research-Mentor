@@ -1,449 +1,437 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
-import API from "../api/api";
-
-import ReactMarkdown from "react-markdown";
+import axios from "axios";
 
 import {
+  Bot,
+  SendHorizonal,
+} from "lucide-react";
 
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  CircularProgress
+export default function Chatbot() {
 
-} from "@mui/material";
+  const [input, setInput] = useState("");
 
-import SmartToyIcon
-from "@mui/icons-material/SmartToy";
+  const [messages, setMessages] = useState([]);
 
-import BoltIcon
-from "@mui/icons-material/Bolt";
+  const [loading, setLoading] = useState(false);
 
-import PsychologyIcon
-from "@mui/icons-material/Psychology";
+  const chatEndRef = useRef(null);
 
-import AutoAwesomeIcon
-from "@mui/icons-material/AutoAwesome";
+  const chatContainerRef = useRef(null);
 
-function Chatbot() {
+  // ---------------- AUTO SCROLL TO LATEST MESSAGE ---------------- //
 
-  const [message, setMessage] =
-    useState("");
+  useEffect(() => {
 
-  const [response, setResponse] =
-    useState("");
+    chatEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
 
-  const [loading, setLoading] =
-    useState(false);
+  }, [messages]);
 
-  const sendMessage =
-    async () => {
+  // ---------------- RESET SCROLL WHEN PAGE OPENS ---------------- //
 
-      if (!message) return;
+  useEffect(() => {
 
-      setLoading(true);
+    window.scrollTo(0, 0);
 
-      try {
+    if (chatContainerRef.current) {
 
-        const res =
-          await API.post(
-            "/chat",
-            { message }
-          );
-
-        setResponse(
-          res.data.response
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-      setLoading(false);
-    };
-
-  const features = [
-
-    {
-
-      title:
-        "Instant AI Responses",
-
-      description:
-        "Get fast answers to technical and AI-related questions instantly.",
-
-      icon:
-        <BoltIcon
-          sx={{
-            color: "#2563eb",
-            fontSize: 40
-          }}
-        />
-
-    },
-
-    {
-
-      title:
-        "AI/ML Knowledge",
-
-      description:
-        "Ask about Machine Learning, NLP, Deep Learning, and Generative AI.",
-
-      icon:
-        <PsychologyIcon
-          sx={{
-            color: "#7c3aed",
-            fontSize: 40
-          }}
-        />
-
-    },
-
-    {
-
-      title:
-        "Smart Explanations",
-
-      description:
-        "Receive concise beginner-friendly answers in bullet points.",
-
-      icon:
-        <AutoAwesomeIcon
-          sx={{
-            color: "#10b981",
-            fontSize: 40
-          }}
-        />
+      chatContainerRef.current.scrollTop = 0;
 
     }
 
-  ];
+  }, []);
+
+  // ---------------- SEND MESSAGE ---------------- //
+
+  const sendMessage = async () => {
+
+    if (!input.trim()) return;
+
+    const updatedMessages = [
+
+      ...messages,
+
+      {
+        role: "user",
+        content: input,
+      },
+
+    ];
+
+    setMessages(updatedMessages);
+
+    setInput("");
+
+    setLoading(true);
+
+    try {
+
+      const res = await axios.post(
+
+        "http://127.0.0.1:8000/chat",
+
+        {
+          messages: updatedMessages,
+        }
+
+      );
+
+      setMessages([
+
+        ...updatedMessages,
+
+        {
+          role: "assistant",
+          content: res.data.response,
+        },
+
+      ]);
+
+    }
+
+    catch (err) {
+
+      console.log(err);
+
+      setMessages([
+
+        ...updatedMessages,
+
+        {
+          role: "assistant",
+          content:
+            "Failed to generate response.",
+        },
+
+      ]);
+
+    }
+
+    setLoading(false);
+
+  };
+
+  // ---------------- ENTER KEY ---------------- //
+
+  const handleKeyDown = (e) => {
+
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey
+    ) {
+
+      e.preventDefault();
+
+      sendMessage();
+
+    }
+
+  };
 
   return (
 
-    <Container
-      maxWidth="lg"
-      sx={{
-        mt: 5,
-        mb: 8
+    <div
+      style={{
+        background: "#f3f4f6",
+
+        minHeight: "100vh",
+
+        padding: "40px",
       }}
     >
 
-      {/* HERO SECTION */}
+      {/* ---------------- CHAT CONTAINER ---------------- */}
 
-      <Paper
-        elevation={2}
+      <div
+        style={{
+          maxWidth: "1450px",
 
-        sx={{
+          margin: "0 auto",
 
-          p: 3,
+          background: "white",
 
-          borderRadius: 5,
+          borderRadius: "30px",
 
-          mb: 4,
+          overflow: "hidden",
 
-          background:
-            "linear-gradient(to right, #ffffff, #f8fafc)"
-
-        }}
-      >
-
-        <Box
-          sx={{
-            textAlign: "center"
-          }}
-        >
-
-          <SmartToyIcon
-            sx={{
-              fontSize: 55,
-              color: "#10b981"
-            }}
-          />
-
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            sx={{ mt: 2 }}
-          >
-
-            AI Chatbot
-
-          </Typography>
-
-          <Typography
-            color="text.secondary"
-            sx={{
-              mt: 1,
-              fontSize: "17px"
-            }}
-          >
-
-            Ask technical questions and
-            receive intelligent AI-powered
-            responses instantly.
-
-          </Typography>
-
-        </Box>
-
-      </Paper>
-
-      {/* CHAT AREA */}
-
-      <Paper
-        elevation={2}
-
-        sx={{
-
-          p: 4,
-
-          borderRadius: 5,
-
-          backgroundColor:
-            "#ffffff"
-
-        }}
-      >
-
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-        >
-
-          Start Conversation
-
-        </Typography>
-
-        <Typography
-          color="text.secondary"
-          sx={{ mt: 1 }}
-        >
-
-          Ask about AI, Machine Learning,
-          Deep Learning, NLP,
-          Generative AI and more.
-
-        </Typography>
-
-        {/* INPUT */}
-
-        <TextField
-          fullWidth
-          multiline
-          rows={7}
-
-          placeholder=
-            "Ask anything..."
-
-          sx={{
-            mt: 4
-          }}
-
-          value={message}
-
-          onChange={(e) =>
-            setMessage(
-              e.target.value
-            )
-          }
-        />
-
-        {/* BUTTON */}
-
-        <Button
-          fullWidth
-          variant="contained"
-          size="large"
-
-          sx={{
-
-            mt: 3,
-
-            py: 1.6,
-
-            borderRadius: 3,
-
-            fontSize: "16px"
-
-          }}
-
-          onClick={sendMessage}
-
-          disabled={loading}
-        >
-
-          {loading
-            ? "Thinking..."
-            : "Send Message"}
-
-        </Button>
-
-        {/* LOADING */}
-
-        {loading && (
-
-          <Box
-            sx={{
-
-              display: "flex",
-
-              justifyContent:
-                "center",
-
-              mt: 4
-
-            }}
-          >
-
-            <CircularProgress />
-
-          </Box>
-
-        )}
-
-        {/* RESPONSE */}
-
-        {response && (
-
-          <Paper
-            elevation={1}
-
-            sx={{
-
-              mt: 4,
-
-              p: 3,
-
-              borderRadius: 4,
-
-              backgroundColor:
-                "#f8fafc",
-
-              border:
-                "1px solid #e2e8f0"
-
-            }}
-          >
-
-            <Typography
-              fontWeight="bold"
-              sx={{ mb: 2 }}
-            >
-
-              AI Response
-
-            </Typography>
-
-            <ReactMarkdown>
-              {response}
-            </ReactMarkdown>
-
-          </Paper>
-
-        )}
-
-      </Paper>
-
-      {/* FEATURE CARDS */}
-
-      <Box
-        sx={{
-
-          mt: 3,
+          boxShadow:
+            "0 4px 20px rgba(0,0,0,0.08)",
 
           display: "flex",
 
-          gap: 3,
-
-          flexWrap: "nowrap",
-
-          justifyContent:
-            "space-between"
-
+          flexDirection: "column",
         }}
       >
 
-        {features.map(
-          (feature, index) => (
+        {/* ---------------- HEADER ---------------- */}
 
-            <Paper
+        <div
+          style={{
+            padding: "50px 40px",
+
+            textAlign: "center",
+
+            borderBottom:
+              "1px solid #e5e7eb",
+          }}
+        >
+
+          <Bot
+            size={65}
+            color="#10b981"
+          />
+
+          <h1
+            style={{
+              fontSize: "85px",
+
+              fontWeight: "900",
+
+              color: "#0f172a",
+
+              marginTop: "20px",
+            }}
+          >
+            AI Chatbot
+          </h1>
+
+          <p
+            style={{
+              fontSize: "20px",
+
+              color: "#475569",
+
+              marginTop: "15px",
+            }}
+          >
+            Ask technical questions and get AI-powered responses instantly.
+          </p>
+
+        </div>
+
+        {/* ---------------- CHAT AREA ---------------- */}
+
+        <div
+          ref={chatContainerRef}
+
+          style={{
+            minHeight: "450px",
+
+            maxHeight: "550px",
+
+            overflowY: "auto",
+
+            padding: "35px",
+
+            background: "#f8fafc",
+          }}
+        >
+
+          {messages.map((msg, index) => (
+
+            <div
               key={index}
 
-              elevation={2}
-
-              sx={{
-
-                flex: 1,
-
-                p: 3,
-
-                borderRadius: 4,
-
-                minHeight: 180,
-
-                transition: "0.3s",
-
+              style={{
                 display: "flex",
 
-                flexDirection: "column",
+                justifyContent:
+                  msg.role === "user"
+                    ? "flex-end"
+                    : "flex-start",
 
-                justifyContent: "center",
-
-                "&:hover": {
-
-                  transform:
-                    "translateY(-5px)"
-
-                }
-
+                marginBottom: "24px",
               }}
             >
 
-              <Box
-                sx={{
-                  mb: 2
+              <div
+                style={{
+                  background:
+                    msg.role === "user"
+                      ? "#2563eb"
+                      : "white",
+
+                  color:
+                    msg.role === "user"
+                      ? "white"
+                      : "#0f172a",
+
+                  padding: "18px 24px",
+
+                  borderRadius: "22px",
+
+                  maxWidth: "72%",
+
+                  fontSize: "17px",
+
+                  lineHeight: "1.8",
+
+                  whiteSpace: "pre-wrap",
+
+                  boxShadow:
+                    "0 3px 10px rgba(0,0,0,0.06)",
+
+                  border:
+                    msg.role === "assistant"
+                      ? "1px solid #e2e8f0"
+                      : "none",
                 }}
               >
 
-                {feature.icon}
+                {msg.content}
 
-              </Box>
+              </div>
 
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-              >
+            </div>
 
-                {feature.title}
+          ))}
 
-              </Typography>
+          {/* ---------------- LOADING ---------------- */}
 
-              <Typography
-                color="text.secondary"
-                sx={{ mt: 1 }}
-              >
+          {loading && (
 
-                {feature.description}
+            <div
+              style={{
+                display: "flex",
 
-              </Typography>
+                alignItems: "center",
 
-            </Paper>
+                gap: "10px",
 
-          )
-        )}
+                color: "#64748b",
 
-      </Box>
+                fontSize: "16px",
+              }}
+            >
 
-    </Container>
+              <div
+                style={{
+                  width: "10px",
+
+                  height: "10px",
+
+                  borderRadius: "50%",
+
+                  background: "#2563eb",
+
+                  animation:
+                    "bounce 1s infinite",
+                }}
+              />
+
+              AI is typing...
+
+            </div>
+
+          )}
+
+          <div ref={chatEndRef}></div>
+
+        </div>
+
+        {/* ---------------- INPUT AREA ---------------- */}
+
+        <div
+          style={{
+            padding: "28px",
+
+            borderTop:
+              "1px solid #e5e7eb",
+
+            display: "flex",
+
+            gap: "18px",
+
+            background: "white",
+          }}
+        >
+
+          <textarea
+            placeholder="Ask anything about AI, ML, NLP..."
+
+            value={input}
+
+            onChange={(e) =>
+              setInput(
+                e.target.value
+              )
+            }
+
+            onKeyDown={handleKeyDown}
+
+            rows={1}
+
+            style={{
+              flex: 1,
+
+              padding: "20px",
+
+              borderRadius: "18px",
+
+              border:
+                "1px solid #cbd5e1",
+
+              fontSize: "18px",
+
+              outline: "none",
+
+              resize: "none",
+
+              background: "#f8fafc",
+
+              fontFamily: "inherit",
+
+              minHeight: "64px",
+            }}
+          />
+
+          <button
+            onClick={sendMessage}
+
+            disabled={loading}
+
+            style={{
+              background: "#2563eb",
+
+              color: "white",
+
+              border: "none",
+
+              padding: "0 34px",
+
+              borderRadius: "18px",
+
+              fontSize: "18px",
+
+              fontWeight: "700",
+
+              cursor: "pointer",
+
+              display: "flex",
+
+              alignItems: "center",
+
+              gap: "10px",
+
+              boxShadow:
+                "0 4px 10px rgba(37,99,235,0.3)",
+            }}
+          >
+
+            <SendHorizonal size={22} />
+
+            Send
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
 
   );
-}
 
-export default Chatbot;
+}

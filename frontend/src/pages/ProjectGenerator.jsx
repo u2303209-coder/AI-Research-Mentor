@@ -1,193 +1,319 @@
 import { useState } from "react";
 
-import API from "../api/api";
-
-import ReactMarkdown from "react-markdown";
-
 import {
-
+  Box,
+  Button,
   Container,
   Paper,
-  Typography,
   TextField,
-  Button,
-  Box,
-  CircularProgress
-
+  Typography,
+  CircularProgress,
 } from "@mui/material";
 
-import PsychologyAltIcon
-from "@mui/icons-material/PsychologyAlt";
+import PsychologyIcon from "@mui/icons-material/Psychology";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
-function ProjectGenerator() {
+import axios from "axios";
 
-  const [domain, setDomain] =
-    useState("");
+export default function ProjectGenerator() {
 
-  const [result, setResult] =
-    useState("");
+  const [domain, setDomain] = useState("");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [projects, setProjects] = useState("");
 
-  const generateProject =
-    async () => {
+  const [loading, setLoading] = useState(false);
+
+  // ---------------- GENERATE PROJECTS ---------------- //
+
+  const generateProjects = async () => {
+
+    if (!domain.trim()) return;
+
+    try {
 
       setLoading(true);
 
-      try {
+      setProjects("");
 
-        const res =
-          await API.post(
-            "/generate-project",
-            { domain }
-          );
+      const res = await axios.post(
 
-        setResult(
-          res.data.response
-        );
+        "http://127.0.0.1:8000/generate-project",
 
-      } catch (error) {
+        {
+          domain,
+        }
 
-        console.log(error);
+      );
 
-      }
+      setProjects(
+        res.data.response
+      );
+
+    }
+
+    catch (error) {
+
+      console.log(error);
+
+      setProjects(
+        "Error generating projects."
+      );
+
+    }
+
+    finally {
 
       setLoading(false);
-    };
+
+    }
+
+  };
+
+  // ---------------- FORMAT PROJECTS ---------------- //
+
+  const formattedProjects = projects
+    .split(/\n(?=\d+\.)/)
+    .filter(
+      (project) =>
+        project.trim() !== ""
+    );
 
   return (
 
-    <Container maxWidth="md">
+    <Container
+      maxWidth="xl"
+      sx={{
+        py: 6,
+      }}
+    >
+
+      {/* MAIN CONTAINER */}
 
       <Paper
-        elevation={4}
+        elevation={0}
         sx={{
+          p: {
+            xs: 4,
+            md: 6,
+          },
 
-          p: 6,
+          borderRadius: "30px",
 
-          mt: 10,
+          background: "#ffffff",
 
-          borderRadius: 6,
+          boxShadow:
+            "0 8px 30px rgba(0,0,0,0.08)",
 
-          backdropFilter:
-            "blur(10px)"
-
+          mb: 5,
         }}
       >
+
+        {/* HEADER */}
 
         <Box
           sx={{
             textAlign: "center",
-            mb: 4
+            mb: 5,
           }}
         >
 
-          <PsychologyAltIcon
+          <PsychologyIcon
             sx={{
               fontSize: 70,
-              color: "#8b5cf6"
+              color: "#7c3aed",
+              mb: 2,
             }}
           />
 
           <Typography
-            variant="h2"
-            fontWeight="bold"
-            sx={{ mt: 2 }}
+            sx={{
+              fontWeight: 900,
+
+              color: "#0f172a",
+
+              fontSize: {
+                xs: "3rem",
+                md: "5rem",
+              },
+
+              lineHeight: 1.1,
+
+              mb: 2,
+            }}
           >
-
             AI Project Generator
-
           </Typography>
 
           <Typography
-            color="text.secondary"
-            sx={{ mt: 2 }}
+            sx={{
+              color: "#475569",
+
+              fontSize: "1.2rem",
+            }}
           >
-
-            Generate innovative
-            project ideas using
-            Large Language Models.
-
+            Generate innovative AI/ML project ideas instantly using AI.
           </Typography>
 
         </Box>
 
+        {/* INPUT */}
+
         <TextField
           fullWidth
-          label="Enter Domain"
+          placeholder="Enter domain (e.g. NLP, Healthcare AI, Computer Vision)"
           value={domain}
           onChange={(e) =>
-            setDomain(e.target.value)
+            setDomain(
+              e.target.value
+            )
           }
+          sx={{
+            mb: 4,
+
+            "& .MuiOutlinedInput-root": {
+
+              borderRadius: "20px",
+
+              fontSize: "1.1rem",
+
+              background: "#f8fafc",
+            },
+          }}
         />
+
+        {/* BUTTON */}
 
         <Button
           fullWidth
           variant="contained"
-          size="large"
-          sx={{
-            mt: 4,
-            py: 1.5,
-            borderRadius: 3
-          }}
-          onClick={generateProject}
+          onClick={generateProjects}
           disabled={loading}
+          sx={{
+            py: 2,
+
+            borderRadius: "16px",
+
+            fontSize: "1rem",
+
+            fontWeight: 700,
+
+            textTransform: "none",
+
+            background: "#2563eb",
+
+            boxShadow:
+              "0 6px 18px rgba(37,99,235,0.3)",
+
+            "&:hover": {
+              background: "#1d4ed8",
+            },
+          }}
         >
 
-          {loading
-            ? "Generating..."
-            : "Generate Project Ideas"}
+          {loading ? (
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+
+              <CircularProgress
+                size={20}
+                sx={{
+                  color: "white",
+                }}
+              />
+
+              Generating...
+
+            </Box>
+
+          ) : (
+
+            "Generate Ideas"
+
+          )}
 
         </Button>
 
-        {loading && (
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              mt: 4
-            }}
-          >
-
-            <CircularProgress />
-
-          </Box>
-
-        )}
-
-        {result && (
-
-          <Paper
-            elevation={2}
-            sx={{
-
-              mt: 5,
-
-              p: 4,
-
-              borderRadius: 4,
-
-              backgroundColor:
-                "#f8fafc"
-
-            }}
-          >
-
-            <ReactMarkdown>
-              {result}
-            </ReactMarkdown>
-
-          </Paper>
-
-        )}
-
       </Paper>
+
+      {/* GENERATED PROJECTS */}
+
+      {projects && (
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+
+            gap: 3,
+          }}
+        >
+
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+
+              color: "#0f172a",
+
+              mb: 1,
+            }}
+          >
+            Generated Ideas
+          </Typography>
+
+          {formattedProjects.map(
+
+            (project, index) => (
+
+              <Paper
+                key={index}
+
+                elevation={0}
+
+                sx={{
+                  p: 4,
+
+                  borderRadius: "24px",
+
+                  background: "#ffffff",
+
+                  boxShadow:
+                    "0 6px 20px rgba(0,0,0,0.06)",
+                }}
+              >
+
+                <Typography
+                  sx={{
+                    color: "#334155",
+
+                    lineHeight: 1.9,
+
+                    whiteSpace: "pre-line",
+
+                    fontSize: "1rem",
+                  }}
+                >
+                  {project.trim()}
+                </Typography>
+
+              </Paper>
+
+            )
+
+          )}
+
+        </Box>
+
+      )}
 
     </Container>
 
   );
-}
 
-export default ProjectGenerator;
+}

@@ -9,7 +9,7 @@ import fitz
 
 router = APIRouter()
 
-# ChromaDB
+# ---------------- CHROMADB ---------------- #
 
 client = chromadb.PersistentClient(
     path="../chroma_db"
@@ -19,18 +19,19 @@ collection = client.get_or_create_collection(
     "pdfs"
 )
 
-# Embedding Model
+# ---------------- EMBEDDING MODEL ---------------- #
 
 model = SentenceTransformer(
     "all-MiniLM-L6-v2"
 )
 
-# Request Model
+# ---------------- REQUEST MODEL ---------------- #
 
 class QuestionRequest(BaseModel):
+
     question: str
 
-# Upload PDF
+# ---------------- UPLOAD PDF ---------------- #
 
 @router.post("/upload-pdf")
 async def upload_pdf(
@@ -42,15 +43,17 @@ async def upload_pdf(
     # Save PDF
 
     with open(path, "wb") as f:
+
         f.write(await file.read())
 
-    # Extract Text Using PyMuPDF
+    # Extract Text
 
     doc = fitz.open(path)
 
     text = ""
 
     for page in doc:
+
         text += page.get_text()
 
     # Better Chunking
@@ -69,7 +72,17 @@ async def upload_pdf(
 
     ]
 
-    # Store Embeddings
+    # ---------------- CLEAR OLD PDF DATA ---------------- #
+
+    existing_ids = collection.get()["ids"]
+
+    if existing_ids:
+
+        collection.delete(
+            ids=existing_ids
+        )
+
+    # ---------------- STORE NEW PDF CHUNKS ---------------- #
 
     for i, chunk in enumerate(chunks):
 
@@ -90,16 +103,20 @@ async def upload_pdf(
         )
 
     return {
+
         "message":
         "PDF uploaded successfully"
+
     }
 
-# Ask Questions
+# ---------------- ASK QUESTIONS ---------------- #
 
 @router.post("/ask-pdf")
-def ask_pdf(data: QuestionRequest):
+def ask_pdf(
+    data: QuestionRequest
+):
 
-    # Convert Question to Embedding
+    # Convert Question To Embedding
 
     query_embedding = model.encode(
         data.question
@@ -117,7 +134,7 @@ def ask_pdf(data: QuestionRequest):
 
     )
 
-    # Combine Context
+    # Combine Retrieved Context
 
     context = " ".join(
         results["documents"][0]
@@ -154,6 +171,10 @@ Format Example:
 
     response = ask_llm(prompt)
 
+    print("AI RESPONSE:", response)
+
     return {
-        "answer": response
+
+        "response": response
+
     }
