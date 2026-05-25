@@ -166,4 +166,4 @@ The objective of Research Mentor AI is to help students, beginners, and research
  Author
 
 Developed by Sooraj S as an AI/ML project during my internship at Nest CyberCampus.
-For any queries mail:soorajs.0805@gmail.com
+For any queries mail: soorajs.0805@gmail.com
