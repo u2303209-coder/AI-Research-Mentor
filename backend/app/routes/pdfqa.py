@@ -31,7 +31,8 @@ class QuestionRequest(BaseModel):
 
     question: str
 
-# ---------------- UPLOAD PDF ---------------- #
+
+# ---------------- PDF UPLOAD ---------------- #
 
 @router.post("/upload-pdf")
 async def upload_pdf(
@@ -40,67 +41,86 @@ async def upload_pdf(
 
     path = f"../uploads/{file.filename}"
 
-    # Save PDF
-
     with open(path, "wb") as f:
 
         f.write(await file.read())
 
-    # Extract Text
-
     doc = fitz.open(path)
 
-    text = ""
+    # Clear old PDF
 
-    for page in doc:
+    existing = collection.get()
 
-        text += page.get_text()
+    if existing["ids"]:
 
-    # Better Chunking
+        collection.delete(
+            ids=existing["ids"]
+        )
+
+    documents = []
+    embeddings = []
+    ids = []
+    metadatas = []
 
     chunk_size = 1000
 
-    chunks = [
+    for page_num, page in enumerate(doc):
 
-        text[i:i + chunk_size]
+        page_text = page.get_text()
 
-        for i in range(
-            0,
-            len(text),
-            chunk_size
-        )
+        if not page_text.strip():
 
-    ]
+            continue
 
-    # ---------------- CLEAR OLD PDF DATA ---------------- #
+        chunks = [
 
-    existing_ids = collection.get()["ids"]
+            page_text[i:i + chunk_size]
 
-    if existing_ids:
+            for i in range(
+                0,
+                len(page_text),
+                chunk_size
+            )
 
-        collection.delete(
-            ids=existing_ids
-        )
+        ]
 
-    # ---------------- STORE NEW PDF CHUNKS ---------------- #
+        for chunk_id, chunk in enumerate(chunks):
 
-    for i, chunk in enumerate(chunks):
+            documents.append(chunk)
 
-        embedding = model.encode(
-            chunk
-        ).tolist()
+            embeddings.append(
 
-        collection.add(
+                model.encode(
+                    chunk
+                ).tolist()
 
-            documents=[chunk],
+            )
 
-            embeddings=[embedding],
+            ids.append(
 
-            ids=[
-                f"{file.filename}_{i}"
-            ]
+                f"{file.filename}_{page_num}_{chunk_id}"
 
-        )
+            )
+
+            metadatas.append({
+
+                "page": page_num + 1,
+
+                "source": file.filename
+
+            })
+
+    collection.add(
+
+        documents=documents,
+
+        embeddings=embeddings,
+
+        ids=ids,
+
+        metadatas=metadatas
+
+    )
 
     return {
 
@@ -109,72 +129,178 @@ async def upload_pdf(
 
     }
 
-# ---------------- ASK QUESTIONS ---------------- #
+
+# ---------------- PDF QA ---------------- #
+
+# ---------------- PDF QA ---------------- #
 
 @router.post("/ask-pdf")
 def ask_pdf(
     data: QuestionRequest
 ):
 
-    # Convert Question To Embedding
+    try:
 
-    query_embedding = model.encode(
-        data.question
-    ).tolist()
+        query_embedding = model.encode(
+            data.question
+        ).tolist()
 
-    # Retrieve Similar Chunks
+        question = data.question.lower()
 
-    results = collection.query(
+        # ---------------- SMART RETRIEVAL ---------------- #
 
-        query_embeddings=[
-            query_embedding
-        ],
+        if " and " in question:
 
-        n_results=5
+            n_results = 8
 
-    )
+        elif question.startswith(
 
-    # Combine Retrieved Context
+            (
+                "what is",
+                "define",
+                "meaning of",
+                "who is",
+                "when is",
+                "where is"
+            )
 
-    context = " ".join(
-        results["documents"][0]
-    )
+        ):
 
-    # Better RAG Prompt
+            n_results = 3
 
-    prompt = f"""
-You are an AI research assistant.
+        else:
 
-Answer ONLY using the PDF context below.
+            n_results = 5
 
-VERY IMPORTANT RULES:
-- ALWAYS answer in bullet points
-- NEVER write long paragraphs
-- Keep each point short
-- Maximum 6 bullet points
-- Use simple beginner-friendly language
-- Be accurate to the PDF
+        results = collection.query(
+
+            query_embeddings=[
+                query_embedding
+            ],
+
+            n_results=n_results
+
+        )
+
+        documents = results["documents"][0]
+
+        metadatas = results["metadatas"][0]
+
+        if not documents:
+
+            return {
+
+                "response":
+                "No relevant information found in the PDF."
+
+            }
+
+        # ---------------- DEBUG ---------------- #
+
+        print("\n====================")
+        print("RETRIEVED CHUNKS")
+        print("====================")
+
+        for i, doc in enumerate(documents):
+
+            print(f"\nChunk {i+1}\n")
+
+            print(doc[:300])
+
+        # ---------------- CONTEXT ---------------- #
+
+        context = "\n\n".join(
+            documents
+        )
+
+        prompt = f"""
+You are an academic research assistant.
+
+Answer ONLY using the PDF context.
+
+Rules:
+
+- Use bullet points.
+- Start directly with the answer.
+- No introductions.
+- No conclusions.
+- No phrases like:
+  "Here is the answer"
+  "I hope this helps"
+  "Based on the PDF"
+
+- If the question asks about multiple concepts,
+  answer each concept separately.
+
+- Never say something is not mentioned in the PDF
+  unless it is genuinely absent from the provided context.
+
+- Do not use outside knowledge.
+
 - If information is missing, say:
-  "Information not found in PDF."
+  Information not found in PDF.
+
+- Use professional academic language.
 
 PDF Context:
+
 {context}
 
 Question:
-{data.question}
 
-Format Example:
-• Point 1
-• Point 2
-• Point 3
+{data.question}
 """
 
-    response = ask_llm(prompt)
+        response = ask_llm(
+            prompt
+        )
 
-    print("AI RESPONSE:", response)
+        # ---------------- SOURCES ---------------- #
 
-    return {
+        pages = []
 
-        "response": response
+        for meta in metadatas:
 
-    }
+            page = meta["page"]
+
+            if page not in pages:
+
+                pages.append(page)
+
+        # Sort pages
+
+        pages = sorted(pages)
+
+        # Keep only top 2 most relevant pages
+
+        pages = pages[:2]
+
+        if pages:
+
+            response += "\n\n📚 Sources\n\n"
+
+            for page in pages:
+
+                response += f"• Page {page}\n"
+
+        return {
+
+            "response": response
+
+        }
+
+    except Exception as e:
+
+        print(
+
+            "PDF QA ERROR:",
+            str(e)
+
+        )
+
+        return {
+
+            "response":
+            f"Error: {str(e)}"
+
+        }

@@ -5,22 +5,29 @@ import {
   Paper,
   TextField,
   Typography,
+  Grid,
 } from "@mui/material";
 
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
 import { useState } from "react";
-
 import axios from "axios";
+
 
 export default function PdfQA() {
 
   const [file, setFile] = useState(null);
 
+
+  
+
+  
+
   const [question, setQuestion] = useState("");
 
   const [answer, setAnswer] = useState("");
+  const [pdfViewerUrl, setPdfViewerUrl] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +40,12 @@ export default function PdfQA() {
     if (!selectedFile) return;
 
     setFile(selectedFile);
+
+    setPdfViewerUrl(
+  `http://127.0.0.1:8000/uploads/${selectedFile.name}`
+);
+
+    setPageNumber(1);
 
     const formData = new FormData();
 
@@ -63,7 +76,7 @@ export default function PdfQA() {
 
   const askQuestion = async () => {
 
-    if (!question) return;
+    if (!question.trim()) return;
 
     setLoading(true);
 
@@ -87,6 +100,8 @@ export default function PdfQA() {
 
     } catch (error) {
 
+      console.log(error);
+
       setAnswer(
         "Error generating response."
       );
@@ -100,11 +115,13 @@ export default function PdfQA() {
   return (
 
     <Container
-      maxWidth="lg"
-      sx={{
-        py: 6,
-      }}
-    >
+  maxWidth={false}
+  disableGutters
+  sx={{
+    py: 4,
+    px: 3,
+  }}
+>
 
       {/* HEADER */}
 
@@ -211,10 +228,9 @@ export default function PdfQA() {
             <Typography
               sx={{
                 color: "#64748b",
-                fontSize: "1rem",
               }}
             >
-              Drag & drop your PDF here or click to browse
+              Click to upload a PDF
             </Typography>
 
           </Box>
@@ -223,7 +239,7 @@ export default function PdfQA() {
 
       </Paper>
 
-      {/* FILE DISPLAY */}
+      {/* FILE NAME */}
 
       {file && (
 
@@ -237,15 +253,12 @@ export default function PdfQA() {
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow:
-              "0 2px 10px rgba(0,0,0,0.04)",
           }}
         >
 
           <PictureAsPdfIcon
             sx={{
               color: "#ef4444",
-              fontSize: 40,
             }}
           />
 
@@ -254,7 +267,6 @@ export default function PdfQA() {
             <Typography
               sx={{
                 fontWeight: 700,
-                color: "#111827",
               }}
             >
               {file.name}
@@ -263,7 +275,6 @@ export default function PdfQA() {
             <Typography
               sx={{
                 color: "#64748b",
-                fontSize: "0.9rem",
               }}
             >
               Ready for analysis
@@ -275,128 +286,183 @@ export default function PdfQA() {
 
       )}
 
-      {/* QUESTION INPUT */}
+      {/* MAIN LAYOUT */}
 
-      <TextField
-        fullWidth
-        multiline
-        rows={5}
-        label="Ask question from PDF"
-        value={question}
-        onChange={(e) =>
-          setQuestion(e.target.value)
-        }
-        sx={{
-          mb: 4,
-        }}
-      />
+      <Grid
+  container
+  spacing={3}
+  sx={{
+    width: "100%",
+  }}
+>
 
-      {/* BUTTON */}
+        {/* PDF VIEWER */}
 
-      <Button
-        fullWidth
-        variant="contained"
-        size="large"
-        disabled={loading || !question}
-        onClick={askQuestion}
-        sx={{
-          py: 2,
-          borderRadius: "18px",
-          fontSize: "1rem",
-          fontWeight: 700,
-          textTransform: "none",
-          background: "#2563eb",
+        <Grid
+  size={{
+    xs: 12,
+    md: 8,
+  }}
+>
 
-          "&:hover": {
-            background: "#1d4ed8",
-          },
-        }}
-      >
-
-        {loading
-          ? "Analyzing..."
-          : "Ask Question"}
-
-      </Button>
-
-      {/* RESPONSE */}
-
-      {answer && (
-
-        <Paper
-          elevation={0}
-          sx={{
-            mt: 5,
-            p: 4,
-            borderRadius: "24px",
-            background: "#ffffff",
-            boxShadow:
-              "0 4px 20px rgba(0,0,0,0.08)",
-          }}
-        >
-
-          <Box
+          <Paper
+            elevation={0}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              mb: 3,
+              p: 3,
+              borderRadius: "24px",
+              minHeight: "800px",
+              boxShadow:
+                "0 4px 20px rgba(0,0,0,0.08)",
+              overflow: "auto",
             }}
           >
-
-            <AutoAwesomeIcon
-              sx={{
-                color: "#2563eb",
-              }}
-            />
 
             <Typography
               variant="h6"
               sx={{
                 fontWeight: 700,
+                mb: 3,
               }}
             >
-              AI Response
+              PDF Preview
             </Typography>
 
-          </Box>
+            <Box
+  sx={{
+    width: "100%",
+    height: "900px",
+    borderRadius: "12px",
+    overflow: "hidden",
+  }}
+>
+  {pdfViewerUrl ? (
+    <iframe
+      src={pdfViewerUrl}
+      width="100%"
+      height="100%"
+      title="PDF Viewer"
+      style={{
+        border: "none",
+      }}
+    />
+  ) : (
+    <Typography
+      sx={{
+        color: "#64748b",
+        p: 2,
+      }}
+    >
+      Upload a PDF to preview it here.
+    </Typography>
+  )}
+</Box>
 
-          <Box
-            component="ul"
+          </Paper>
+
+        </Grid>
+
+        {/* QUESTION + ANSWER */}
+
+        <Grid
+  size={{
+    xs: 12,
+    md: 4,
+  }}
+>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={5}
+            label="Ask question from PDF"
+            value={question}
+            onChange={(e) =>
+              setQuestion(
+                e.target.value
+              )
+            }
             sx={{
-              pl: 3,
-              m: 0,
+              mb: 3,
+            }}
+          />
+
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            disabled={
+              loading ||
+              !question
+            }
+            onClick={askQuestion}
+            sx={{
+              py: 2,
+              borderRadius: "18px",
+              textTransform: "none",
+              fontWeight: 700,
             }}
           >
+            {loading
+              ? "Analyzing..."
+              : "Ask Question"}
+          </Button>
 
-            {answer
-              ?.split("•")
-              .filter(
-                (item) =>
-                  item.trim() !== ""
-              )
-              .map((item, index) => (
+          {answer && (
+
+            <Paper
+              elevation={0}
+              sx={{
+                mt: 4,
+                p: 4,
+                borderRadius: "24px",
+                boxShadow:
+                  "0 4px 20px rgba(0,0,0,0.08)",
+              }}
+            >
+
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 3,
+                }}
+              >
+
+                <AutoAwesomeIcon
+                  sx={{
+                    color: "#2563eb",
+                  }}
+                />
 
                 <Typography
-                  component="li"
-                  key={index}
+                  variant="h6"
                   sx={{
-                    mb: 2,
-                    lineHeight: 1.9,
-                    color: "#374151",
-                    fontSize: "1rem",
+                    fontWeight: 700,
                   }}
                 >
-                  {item.trim()}
+                  AI Response
                 </Typography>
 
-              ))}
+              </Box>
 
-          </Box>
+              <Box
+                sx={{
+                  whiteSpace: "pre-wrap",
+                  lineHeight: 2,
+                  color: "#374151",
+                }}
+              >
+                {answer}
+              </Box>
 
-        </Paper>
+            </Paper>
 
-      )}
+          )}
+
+        </Grid>
+
+      </Grid>
 
     </Container>
 
