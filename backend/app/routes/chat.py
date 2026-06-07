@@ -6,13 +6,10 @@ from app.services.llm_service import ask_llm
 router = APIRouter()
 
 
-# ---------------- REQUEST MODEL ---------------- #
+
 
 class ChatRequest(BaseModel):
     messages: list
-
-
-# ---------------- CHAT ROUTE ---------------- #
 
 @router.post("/chat")
 def chat(data: ChatRequest):
@@ -47,6 +44,7 @@ You are a smart AI assistant specialized in:
 - NLP
 - Data Science
 - Generative AI
+-Strictly avoid markdown symbols like ** or ## in your responses always.
 
 Guidelines:
 - Answer naturally like ChatGPT
@@ -66,7 +64,7 @@ Conversation:
 Assistant:
 """
 
-    # GENERATE RESPONSE
+    
 
     response = ask_llm(prompt)
 

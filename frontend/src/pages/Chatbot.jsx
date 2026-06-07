@@ -54,7 +54,7 @@ export default function Chatbot() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         .chat-page {
-          background: #f8f7f4;
+          background: #e8e4dc;
           min-height: 100vh;
           font-family: 'DM Sans', sans-serif;
           padding-top: 68px;
@@ -88,7 +88,7 @@ export default function Chatbot() {
         }
 
         .chat-header-text p {
-          font-size: 0.83rem; color: #9ca3af;
+          font-size: 0.83rem; color: #1f2022;
           margin-top: 3px; font-weight: 300;
         }
 
@@ -124,7 +124,7 @@ export default function Chatbot() {
         .empty-heading {
           font-family: 'Syne', sans-serif;
           font-size: 1.7rem; font-weight: 800;
-          color: #9ca3af; text-align: center;
+          color: #37373a; text-align: center;
           letter-spacing: -0.5px;
         }
 
@@ -225,7 +225,7 @@ export default function Chatbot() {
 
         .chat-input-area {
           position: sticky; bottom: 0;
-          background: linear-gradient(to top, #f8f7f4 75%, transparent);
+          background: transparent;
           padding: 16px 60px 32px;
           max-width: 860px; width: 100%;
           margin: 0 auto;
@@ -233,7 +233,7 @@ export default function Chatbot() {
 
         .input-wrapper {
           display: flex; align-items: flex-end; gap: 10px;
-          background: white;
+          background: rgba(255,255,255,0.75);
           border: 1px solid #e5e7eb;
           border-radius: 20px;
           padding: 10px 10px 10px 20px;
@@ -251,7 +251,7 @@ export default function Chatbot() {
           line-height: 1.6; padding: 8px 0;
         }
 
-        .chat-textarea::placeholder { color: #c9cdd4; }
+        .chat-textarea::placeholder { color: #1c1d1e; }
 
         .send-btn {
           width: 42px; height: 42px; border-radius: 12px;
@@ -266,7 +266,7 @@ export default function Chatbot() {
 
         .input-hint {
           text-align: center; font-size: 0.7rem;
-          color: #d1d5db; margin-top: 10px; letter-spacing: 0.3px;
+          color: #28292b; margin-top: 10px; letter-spacing: 0.3px;
         }
 
         @media (max-width: 700px) {

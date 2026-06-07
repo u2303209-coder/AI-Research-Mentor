@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+
 export default function PdfQA() {
   const [file, setFile] = useState(null);
+
+  // Force scroll to top on mount — fixes mid-page entry
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [pdfViewerUrl, setPdfViewerUrl] = useState("");
@@ -38,7 +46,7 @@ export default function PdfQA() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         .pdf-page {
-          background: #f8f7f4;
+          background: #e8e4dc;
           min-height: 100vh;
           font-family: 'DM Sans', sans-serif;
           padding-top: 68px;
@@ -155,7 +163,7 @@ export default function PdfQA() {
           display: flex; flex-direction: column;
           padding: 28px 24px; gap: 16px;
           overflow-y: auto;
-          background: #f8f7f4;
+          background: #e8e4dc;
         }
 
         .qa-section-label {
